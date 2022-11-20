@@ -49,7 +49,7 @@ class MainViewController: UIViewController {
         self.compareButton.layer.cornerRadius = 10
         self.compareButton.titleLabel?.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         self.compareButton.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20)
-
+        
         self.cpuToggleLabel = UILabel()
         self.cpuToggleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.cpuToggleLabel.text = "Use CPU: "
