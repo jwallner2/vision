@@ -11,14 +11,19 @@ import UIKit
 protocol MainViewInterface: UIViewController {
     func updateImages(listA: [ImageDataViewModel], listB: [ImageDataViewModel])
     func updateResult(value: String)
+    func setCpuSwitchValue(value: Bool)
+    func updateRenderDuration(duration: Double)
 }
 
 class MainViewController: UIViewController {
     private let presenter: MainPresenterHandler
     private var resultLabel: UILabel
+    private var durationResultLabel: UILabel
     private var topCollectionView: UICollectionView
     private var bottomCollectionView: UICollectionView
     private var compareButton: UIButton
+    private let cpuToggleLabel: UILabel
+    private var cpuSwitch: UISwitch
     private let reuseIdentifier = "cell"
     private var listA: [ImageDataViewModel]
     private var listB: [ImageDataViewModel]
@@ -32,13 +37,27 @@ class MainViewController: UIViewController {
         self.resultLabel.textColor = UIColor(named: "gray")
         self.resultLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
 
+        self.durationResultLabel = UILabel()
+        self.durationResultLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.durationResultLabel.textColor = UIColor(named: "gray")
+        self.durationResultLabel.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+
         self.compareButton = UIButton()
         self.compareButton.translatesAutoresizingMaskIntoConstraints = false
         self.compareButton.setTitle("Compare", for: .normal)
         self.compareButton.backgroundColor = UIColor(named: "pink")
         self.compareButton.layer.cornerRadius = 10
         self.compareButton.titleLabel?.font = UIFont.systemFont(ofSize: 28, weight: .bold)
-        self.compareButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
+        self.compareButton.configuration?.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20)
+
+        self.cpuToggleLabel = UILabel()
+        self.cpuToggleLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.cpuToggleLabel.text = "Use CPU: "
+        self.cpuToggleLabel.textColor = UIColor(named: "gray")
+        self.cpuToggleLabel.font = UIFont.systemFont(ofSize: 28, weight: .regular)
+
+        self.cpuSwitch = UISwitch()
+        self.cpuSwitch.translatesAutoresizingMaskIntoConstraints = false
 
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -69,6 +88,7 @@ class MainViewController: UIViewController {
         bottomCollectionView.dataSource = self
 
         compareButton.addTarget(self, action: #selector(compareButtonTap), for: .touchUpInside)
+        cpuSwitch.addTarget(self, action: #selector(cpuSwitchValueChange), for: .valueChanged)
     }
 
     required init?(coder: NSCoder) {
@@ -88,11 +108,13 @@ class MainViewController: UIViewController {
         self.view.addSubview(topCollectionView)
         self.view.addSubview(bottomCollectionView)
         self.view.addSubview(compareButton)
+        self.view.addSubview(cpuToggleLabel)
+        self.view.addSubview(cpuSwitch)
+        self.view.addSubview(durationResultLabel)
     }
 
     private func setupConstraints() {
-        resultLabel.topAnchor.constraint(equalTo: bottomCollectionView.bottomAnchor).isActive = true
-        resultLabel.bottomAnchor.constraint(equalTo: compareButton.topAnchor).isActive = true
+        resultLabel.topAnchor.constraint(equalTo: cpuToggleLabel.bottomAnchor, constant: 28).isActive = true
         resultLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
 
         topCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 48).isActive = true
@@ -107,14 +129,34 @@ class MainViewController: UIViewController {
 
         compareButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         compareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -48).isActive = true
+
+        cpuToggleLabel.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: 18).isActive = true
+        cpuToggleLabel.topAnchor.constraint(equalTo: self.bottomCollectionView.bottomAnchor, constant: 18).isActive = true
+
+        cpuSwitch.leftAnchor.constraint(equalTo: self.cpuToggleLabel.rightAnchor).isActive = true
+        cpuSwitch.centerYAnchor.constraint(equalTo: self.cpuToggleLabel.centerYAnchor).isActive = true
+
+        durationResultLabel.centerXAnchor.constraint(equalTo: resultLabel.centerXAnchor).isActive = true
+        durationResultLabel.topAnchor.constraint(equalTo: resultLabel.bottomAnchor).isActive = true
     }
 
     @objc func compareButtonTap() {
         self.presenter.onCompareButtonTap()
     }
+
+    @objc func cpuSwitchValueChange() {
+        self.presenter.onCpuSwitchValueChange(value: self.cpuSwitch.isOn)
+    }
 }
 
 extension MainViewController: MainViewInterface {
+    func updateRenderDuration(duration: Double) {
+        durationResultLabel.text = "Computed in: \(duration)s"
+    }
+    func setCpuSwitchValue(value: Bool) {
+        self.cpuSwitch.isOn = value
+    }
+
     func updateImages(listA: [ImageDataViewModel], listB: [ImageDataViewModel]) {
         self.listA = listA
         self.listB = listB
@@ -123,7 +165,7 @@ extension MainViewController: MainViewInterface {
     }
 
     func updateResult(value: String) {
-        self.resultLabel.text = String(value)
+        self.resultLabel.text = "Distance: \(value)"
     }
 }
 
