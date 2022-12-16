@@ -13,7 +13,6 @@ import Vision
 protocol MainPresenterHandler: AnyObject {
     func onViewDidLoad()
     func onCompareButtonTap()
-    func onCpuSwitchValueChange(value: Bool)
     func selectImageA(image: ImageDataViewModel)
     func selectImageB(image: ImageDataViewModel)
 }
@@ -21,29 +20,33 @@ protocol MainPresenterHandler: AnyObject {
 class MainPresenter {
     weak var mainView: MainViewInterface?
 
-    private var cpuOnly = false
+    private var listA: [ImageDataViewModel] = [ImageDataViewModel(id: 0, image: UIImage(named: "cat.png")!),
+                                               ImageDataViewModel(id: 1, image: UIImage(named: "catFilter.png")!),
+                                               ImageDataViewModel(id: 2, image: UIImage(named: "catRotate.png")!),
+                                               ImageDataViewModel(id: 3, image: UIImage(named: "cat1.jpg")!),
+                                               ImageDataViewModel(id: 4, image: UIImage(named: "cat2.jpg")!),
+                                               ImageDataViewModel(id: 5, image: UIImage(named: "cat3.jpg")!),
+                                               ImageDataViewModel(id: 6, image: UIImage(named: "cat4.jpg")!),
+                                               ImageDataViewModel(id: 7, image: UIImage(named: "cat5.jpg")!),
+                                               ImageDataViewModel(id: 8, image: UIImage(named: "cat6.jpg")!),
+                                               ImageDataViewModel(id: 9, image: UIImage(named: "cat7.jpg")!),
+                                               ImageDataViewModel(id: 10, image: UIImage(named: "cat8.jpg")!),
+                                               ImageDataViewModel(id: 11, image: UIImage(named: "cat9.jpg")!),
+                                               ImageDataViewModel(id: 12, image: UIImage(named: "cat10.jpg")!)]
 
-    private var listA: [ImageDataViewModel] = [ImageDataViewModel(id: 0, image: UIImage(named: "cat1.jpg")!),
-                                               ImageDataViewModel(id: 1, image: UIImage(named: "cat2.jpg")!),
-                                               ImageDataViewModel(id: 2, image: UIImage(named: "cat3.jpg")!),
-                                               ImageDataViewModel(id: 3, image: UIImage(named: "cat4.jpg")!),
-                                               ImageDataViewModel(id: 4, image: UIImage(named: "cat5.jpg")!),
-                                               ImageDataViewModel(id: 5, image: UIImage(named: "cat6.jpg")!),
-                                               ImageDataViewModel(id: 6, image: UIImage(named: "cat7.jpg")!),
-                                               ImageDataViewModel(id: 7, image: UIImage(named: "cat8.jpg")!),
-                                               ImageDataViewModel(id: 8, image: UIImage(named: "cat9.jpg")!),
-                                               ImageDataViewModel(id: 9, image: UIImage(named: "cat10.jpg")!)]
-
-    private var listB: [ImageDataViewModel] = [ImageDataViewModel(id: 0, image: UIImage(named: "cat1.jpg")!),
-                                              ImageDataViewModel(id: 1, image: UIImage(named: "cat2.jpg")!),
-                                              ImageDataViewModel(id: 2, image: UIImage(named: "cat3.jpg")!),
-                                              ImageDataViewModel(id: 3, image: UIImage(named: "cat4.jpg")!),
-                                              ImageDataViewModel(id: 4, image: UIImage(named: "cat5.jpg")!),
-                                              ImageDataViewModel(id: 5, image: UIImage(named: "cat6.jpg")!),
-                                              ImageDataViewModel(id: 6, image: UIImage(named: "cat7.jpg")!),
-                                              ImageDataViewModel(id: 7, image: UIImage(named: "cat8.jpg")!),
-                                              ImageDataViewModel(id: 8, image: UIImage(named: "cat9.jpg")!),
-                                              ImageDataViewModel(id: 9, image: UIImage(named: "cat10.jpg")!)]
+    private var listB: [ImageDataViewModel] = [ImageDataViewModel(id: 0, image: UIImage(named: "cat.png")!),
+                                               ImageDataViewModel(id: 1, image: UIImage(named: "catFilter.png")!),
+                                               ImageDataViewModel(id: 2, image: UIImage(named: "catRotate.png")!),
+                                               ImageDataViewModel(id: 3, image: UIImage(named: "cat1.jpg")!),
+                                               ImageDataViewModel(id: 4, image: UIImage(named: "cat2.jpg")!),
+                                               ImageDataViewModel(id: 5, image: UIImage(named: "cat3.jpg")!),
+                                               ImageDataViewModel(id: 6, image: UIImage(named: "cat4.jpg")!),
+                                               ImageDataViewModel(id: 7, image: UIImage(named: "cat5.jpg")!),
+                                               ImageDataViewModel(id: 8, image: UIImage(named: "cat6.jpg")!),
+                                               ImageDataViewModel(id: 9, image: UIImage(named: "cat7.jpg")!),
+                                               ImageDataViewModel(id: 10, image: UIImage(named: "cat8.jpg")!),
+                                               ImageDataViewModel(id: 11, image: UIImage(named: "cat9.jpg")!),
+                                               ImageDataViewModel(id: 12, image: UIImage(named: "cat10.jpg")!)]
 
     private func updateView() {
         mainView!.updateImages(listA: self.listA, listB: self.listB)
@@ -52,7 +55,6 @@ class MainPresenter {
     private func featurePrintForImage(image: UIImage) -> VNFeaturePrintObservation? {
         let requestHandler = VNImageRequestHandler(cgImage: image.cgImage!, options: [:])
         let request = VNGenerateImageFeaturePrintRequest()
-        request.usesCPUOnly = cpuOnly
         do {
             try requestHandler.perform([request])
             return request.results?.first as? VNFeaturePrintObservation
@@ -64,10 +66,6 @@ class MainPresenter {
 }
 
 extension MainPresenter: MainPresenterHandler {
-
-    func onCpuSwitchValueChange(value: Bool) {
-        self.cpuOnly = value
-    }
 
     func onCompareButtonTap() {
         guard let imageA = listA.first(where: { $0.selected }), let imageB = listB.first(where: { $0.selected }) else {
@@ -120,7 +118,6 @@ extension MainPresenter: MainPresenterHandler {
 
     func onViewDidLoad() {
         updateView()
-        mainView?.setCpuSwitchValue(value: self.cpuOnly)
     }
 }
 
