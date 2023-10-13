@@ -20,33 +20,22 @@ protocol MainPresenterHandler: AnyObject {
 class MainPresenter {
     weak var mainView: MainViewInterface?
 
-    private var listA: [ImageDataViewModel] = [ImageDataViewModel(id: 0, image: UIImage(named: "cat.png")!),
-                                               ImageDataViewModel(id: 1, image: UIImage(named: "catFilter.png")!),
-                                               ImageDataViewModel(id: 2, image: UIImage(named: "catRotate.png")!),
-                                               ImageDataViewModel(id: 3, image: UIImage(named: "cat1.jpg")!),
-                                               ImageDataViewModel(id: 4, image: UIImage(named: "cat2.jpg")!),
-                                               ImageDataViewModel(id: 5, image: UIImage(named: "cat3.jpg")!),
-                                               ImageDataViewModel(id: 6, image: UIImage(named: "cat4.jpg")!),
-                                               ImageDataViewModel(id: 7, image: UIImage(named: "cat5.jpg")!),
-                                               ImageDataViewModel(id: 8, image: UIImage(named: "cat6.jpg")!),
-                                               ImageDataViewModel(id: 9, image: UIImage(named: "cat7.jpg")!),
-                                               ImageDataViewModel(id: 10, image: UIImage(named: "cat8.jpg")!),
-                                               ImageDataViewModel(id: 11, image: UIImage(named: "cat9.jpg")!),
-                                               ImageDataViewModel(id: 12, image: UIImage(named: "cat10.jpg")!)]
+    private let images = [
+        "cat.jpg", "catRotate.jpg", "catFilter.jpg", "cat-zoom.jpg", "cat-resized-one-third.jpg",
+        "black.jpeg", "white.jpg", "noise.jpg",
+        "cat1.jpg", "cat2.jpg", "cat3.jpg", "cat4.jpg", "cat5.jpg", "cat6.jpg", "cat7.jpg", "cat8.jpg", "cat9.jpg", "cat10.jpg",
+        "d1.jpg", "n3.jpg"
+    ]
 
-    private var listB: [ImageDataViewModel] = [ImageDataViewModel(id: 0, image: UIImage(named: "cat.png")!),
-                                               ImageDataViewModel(id: 1, image: UIImage(named: "catFilter.png")!),
-                                               ImageDataViewModel(id: 2, image: UIImage(named: "catRotate.png")!),
-                                               ImageDataViewModel(id: 3, image: UIImage(named: "cat1.jpg")!),
-                                               ImageDataViewModel(id: 4, image: UIImage(named: "cat2.jpg")!),
-                                               ImageDataViewModel(id: 5, image: UIImage(named: "cat3.jpg")!),
-                                               ImageDataViewModel(id: 6, image: UIImage(named: "cat4.jpg")!),
-                                               ImageDataViewModel(id: 7, image: UIImage(named: "cat5.jpg")!),
-                                               ImageDataViewModel(id: 8, image: UIImage(named: "cat6.jpg")!),
-                                               ImageDataViewModel(id: 9, image: UIImage(named: "cat7.jpg")!),
-                                               ImageDataViewModel(id: 10, image: UIImage(named: "cat8.jpg")!),
-                                               ImageDataViewModel(id: 11, image: UIImage(named: "cat9.jpg")!),
-                                               ImageDataViewModel(id: 12, image: UIImage(named: "cat10.jpg")!)]
+    private lazy var listA = makeImageViewModel()
+
+    private lazy var listB = makeImageViewModel()
+
+    private func makeImageViewModel() -> [ImageDataViewModel] {
+        images.enumerated().map { index, name in
+            ImageDataViewModel(id: index, image: UIImage(named: name)!)
+        }
+    }
 
     private func updateView() {
         mainView!.updateImages(listA: self.listA, listB: self.listB)
