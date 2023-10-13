@@ -15,6 +15,7 @@ protocol MainPresenterHandler: AnyObject {
     func onCompareButtonTap()
     func selectImageA(image: ImageDataViewModel)
     func selectImageB(image: ImageDataViewModel)
+    func selectRevision(_ value: Int)
 }
 
 class MainPresenter {
@@ -31,9 +32,19 @@ class MainPresenter {
 
     private lazy var listB = makeImageViewModel()
 
+    private var revision: Int
+
     private func makeImageViewModel() -> [ImageDataViewModel] {
         images.enumerated().map { index, name in
             ImageDataViewModel(id: index, image: UIImage(named: name)!)
+        }
+    }
+
+    init() {
+        if #available(iOS 17.0, *) {
+            self.revision = VNGenerateImageFeaturePrintRequestRevision2
+        } else {
+            self.revision = VNGenerateImageFeaturePrintRequestRevision1
         }
     }
 
@@ -41,16 +52,23 @@ class MainPresenter {
         mainView!.updateImages(listA: self.listA, listB: self.listB)
     }
 
-    private func featurePrintForImage(image: UIImage) -> VNFeaturePrintObservation? {
-        let requestHandler = VNImageRequestHandler(cgImage: image.cgImage!, options: [:])
-        let request = VNGenerateImageFeaturePrintRequest()
+    func featurePrintForImage(image: UIImage) -> VNFeaturePrintObservation? {
+        let requestHandler = VNImageRequestHandler(
+            cgImage: image.cgImage!,
+            options: [:]
+        )
         do {
+            let request = VNGenerateImageFeaturePrintRequest()
+            request.revision = self.revision
             try requestHandler.perform([request])
             return request.results?.first as? VNFeaturePrintObservation
         } catch {
-            print("Vision error: \(error)")
             return nil
         }
+    }
+
+    private func updateRevision() {
+        mainView?.updateRevision(value: "Revision #\(self.revision)")
     }
 }
 
@@ -105,8 +123,15 @@ extension MainPresenter: MainPresenterHandler {
         updateView()
     }
 
+    func selectRevision(_ value: Int) {
+        self.revision = value
+        updateRevision()
+        onCompareButtonTap()
+    }
+
     func onViewDidLoad() {
         updateView()
+        updateRevision()
     }
 }
 

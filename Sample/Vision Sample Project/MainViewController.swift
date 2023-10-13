@@ -12,6 +12,7 @@ protocol MainViewInterface: UIViewController {
     func updateImages(listA: [ImageDataViewModel], listB: [ImageDataViewModel])
     func updateResult(value: String)
     func updateRenderDuration(duration: Double)
+    func updateRevision(value: String)
 }
 
 class MainViewController: UIViewController {
@@ -21,6 +22,7 @@ class MainViewController: UIViewController {
     private var topCollectionView: UICollectionView
     private var bottomCollectionView: UICollectionView
     private var compareButton: UIButton
+    private var revisionButton: UIButton
     private let reuseIdentifier = "cell"
     private var listA: [ImageDataViewModel]
     private var listB: [ImageDataViewModel]
@@ -46,6 +48,18 @@ class MainViewController: UIViewController {
         self.compareButton.layer.cornerRadius = 10
         self.compareButton.titleLabel?.font = UIFont.systemFont(ofSize: 28, weight: .bold)
         self.compareButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
+
+        self.revisionButton = UIButton()
+        self.revisionButton.translatesAutoresizingMaskIntoConstraints = false
+        self.revisionButton.titleLabel?.font = .systemFont(ofSize: 18)
+        self.revisionButton.setTitleColor(UIColor(named: "pink-pale"), for: .normal)
+        self.revisionButton.setTitleColor(UIColor(named: "pink"), for: .highlighted)
+
+        if #available(iOS 17.0, *) {
+            self.revisionButton.isHidden = false
+        } else {
+            self.revisionButton.isHidden = true
+        }
 
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -76,6 +90,8 @@ class MainViewController: UIViewController {
         bottomCollectionView.dataSource = self
 
         compareButton.addTarget(self, action: #selector(compareButtonTap), for: .touchUpInside)
+
+        revisionButton.addTarget(self, action: #selector(revisionButtonTap), for: .touchUpInside)
     }
 
     required init?(coder: NSCoder) {
@@ -96,6 +112,7 @@ class MainViewController: UIViewController {
         self.view.addSubview(bottomCollectionView)
         self.view.addSubview(compareButton)
         self.view.addSubview(durationResultLabel)
+        self.view.addSubview(revisionButton)
     }
 
     private func setupConstraints() {
@@ -117,16 +134,36 @@ class MainViewController: UIViewController {
 
         durationResultLabel.centerXAnchor.constraint(equalTo: resultLabel.centerXAnchor).isActive = true
         durationResultLabel.topAnchor.constraint(equalTo: resultLabel.bottomAnchor).isActive = true
+        revisionButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        revisionButton.topAnchor.constraint(equalTo: compareButton.bottomAnchor, constant: 14).isActive = true
     }
 
     @objc func compareButtonTap() {
         self.presenter.onCompareButtonTap()
+    }
+
+    @objc func revisionButtonTap() {
+        let alert = UIAlertController(title: "Algorithm revision", message: "Select the feature print extraction algorithm revision", preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Revision 1", style: .default) { action in
+            self.presenter.selectRevision(1)
+        })
+        alert.addAction(UIAlertAction(title: "Revision 2", style: .default) { action in
+            self.presenter.selectRevision(2)
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        self.present(alert, animated: true)
     }
 }
 
 extension MainViewController: MainViewInterface {
     func updateRenderDuration(duration: Double) {
         durationResultLabel.text = "Computed in: \(duration)s"
+    }
+
+    func updateRevision(value: String) {
+        revisionButton.setTitle(value, for: .normal)
+        resultDetailsLabel.text = ""
+        resultLabel.text = ""
     }
 
     func updateImages(listA: [ImageDataViewModel], listB: [ImageDataViewModel]) {
