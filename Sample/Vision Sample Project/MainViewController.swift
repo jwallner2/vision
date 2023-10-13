@@ -11,14 +11,14 @@ import UIKit
 protocol MainViewInterface: UIViewController {
     func updateImages(listA: [ImageDataViewModel], listB: [ImageDataViewModel])
     func updateResult(value: String)
-    func updateRenderDuration(duration: Double)
+    func updateRenderDetails(_ message: String)
     func updateRevision(value: String)
 }
 
 class MainViewController: UIViewController {
     private let presenter: MainPresenterHandler
     private var resultLabel: UILabel
-    private var durationResultLabel: UILabel
+    private var resultDetailsLabel: UILabel
     private var topCollectionView: UICollectionView
     private var bottomCollectionView: UICollectionView
     private var compareButton: UIButton
@@ -36,10 +36,11 @@ class MainViewController: UIViewController {
         self.resultLabel.textColor = UIColor(named: "gray")
         self.resultLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
 
-        self.durationResultLabel = UILabel()
-        self.durationResultLabel.translatesAutoresizingMaskIntoConstraints = false
-        self.durationResultLabel.textColor = UIColor(named: "gray")
-        self.durationResultLabel.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        self.resultDetailsLabel = UILabel()
+        self.resultDetailsLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.resultDetailsLabel.textColor = UIColor(named: "gray")
+        self.resultDetailsLabel.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+        self.resultDetailsLabel.numberOfLines = 0
 
         self.compareButton = UIButton()
         self.compareButton.translatesAutoresizingMaskIntoConstraints = false
@@ -111,7 +112,7 @@ class MainViewController: UIViewController {
         self.view.addSubview(topCollectionView)
         self.view.addSubview(bottomCollectionView)
         self.view.addSubview(compareButton)
-        self.view.addSubview(durationResultLabel)
+        self.view.addSubview(resultDetailsLabel)
         self.view.addSubview(revisionButton)
     }
 
@@ -132,8 +133,9 @@ class MainViewController: UIViewController {
         compareButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         compareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -48).isActive = true
 
-        durationResultLabel.centerXAnchor.constraint(equalTo: resultLabel.centerXAnchor).isActive = true
-        durationResultLabel.topAnchor.constraint(equalTo: resultLabel.bottomAnchor).isActive = true
+        resultDetailsLabel.centerXAnchor.constraint(equalTo: resultLabel.centerXAnchor).isActive = true
+        resultDetailsLabel.topAnchor.constraint(equalTo: resultLabel.bottomAnchor).isActive = true
+
         revisionButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         revisionButton.topAnchor.constraint(equalTo: compareButton.bottomAnchor, constant: 14).isActive = true
     }
@@ -156,8 +158,8 @@ class MainViewController: UIViewController {
 }
 
 extension MainViewController: MainViewInterface {
-    func updateRenderDuration(duration: Double) {
-        durationResultLabel.text = "Computed in: \(duration)s"
+    func updateRenderDetails(_ message: String) {
+        resultDetailsLabel.text = message
     }
 
     func updateRevision(value: String) {

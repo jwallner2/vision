@@ -34,6 +34,13 @@ class MainPresenter {
 
     private var revision: Int
 
+    private let durationFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 2
+        return formatter
+    }()
+
     private func makeImageViewModel() -> [ImageDataViewModel] {
         images.enumerated().map { index, name in
             ImageDataViewModel(id: index, image: UIImage(named: name)!)
@@ -72,14 +79,22 @@ class MainPresenter {
     }
 }
 
+private extension UIImage {
+    var sizeDescInPix: String {
+        "\(Int(size.width * scale))x\(Int(size.height * scale))"
+    }
+}
+
 extension MainPresenter: MainPresenterHandler {
 
     func onCompareButtonTap() {
         guard let imageA = listA.first(where: { $0.selected }), let imageB = listB.first(where: { $0.selected }) else {
-            self.mainView?.updateResult(value: "Please select two images")
+            self.mainView?.updateResult(value: "N/A")
+            self.mainView?.updateRenderDetails("Please select two images")
             return
         }
 
+        let featurePrintStart = Date()
         let sourceImageFeaturePrint = featurePrintForImage(image: imageA.image)
 
         let modelImageFeaturePrint = featurePrintForImage(image: imageB.image)
@@ -88,11 +103,20 @@ extension MainPresenter: MainPresenterHandler {
             var distance = Float(0)
             if let sourceObservation = sourceImageFeaturePrint {
                 try modelImageFeaturePrint?.computeDistance(&distance, to: sourceObservation)
+                let endDate = Date()
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
 
                     self.mainView?.updateResult(value: String(ceil(distance * 100) / 100.0))
-                    self.mainView?.updateRenderDuration(duration: ceil((Date().timeIntervalSince(renderStart) * 1000) * 1000) / 1000.0)
+
+                    let featurePrintDuration = renderStart.timeIntervalSince(featurePrintStart) * 1000.0
+                    let distanceDuration = endDate.timeIntervalSince(renderStart) * 1_000_000.0
+                    let details = """
+                    Feature print took: \(durationFormatter.string(from: featurePrintDuration as NSNumber)!) ms.
+                    Distance computation took: \(durationFormatter.string(from: distanceDuration as NSNumber)!) µs.
+                    Image sizes: \(imageA.image.sizeDescInPix) & \(imageB.image.sizeDescInPix)
+                    """
+                    self.mainView?.updateRenderDetails(details)
                 }
 
             }
