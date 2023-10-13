@@ -85,6 +85,21 @@ private extension UIImage {
     }
 }
 
+private extension Array where Array.Element == Float {
+
+    func distance(_ rhs: Self) -> Float {
+        assert(self.count == rhs.count)
+        let d2 = self.enumerated().reduce(0) { res, cur in
+            res + (cur.1 - rhs[cur.0]) * (cur.1 - rhs[cur.0])
+        }
+        return sqrt(d2)
+    }
+
+    var norm: Double {
+        sqrt(reduce(Double(0)) { $0 + Double($1 * $1) })
+    }
+}
+
 extension MainPresenter: MainPresenterHandler {
 
     func onCompareButtonTap() {
@@ -105,6 +120,14 @@ extension MainPresenter: MainPresenterHandler {
                 var distance = Float(0)
                 try modelObservation.computeDistance(&distance, to: sourceObservation)
                 let endDate = Date()
+
+                // Debug info
+                let arrayA = sourceObservation.data.withUnsafeBytes { Array($0.bindMemory(to: Float.self)) }
+                let arrayB = modelObservation.data.withUnsafeBytes { Array($0.bindMemory(to: Float.self)) }
+                let distanceCheck = arrayA.distance(arrayB)
+                print("Vector norms: \(arrayA.norm) and \(arrayB.norm)")
+                print("Vision distance: \(distance) - recomputed distance: \(distanceCheck)")
+
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
 
