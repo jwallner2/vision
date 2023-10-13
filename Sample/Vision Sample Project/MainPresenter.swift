@@ -96,21 +96,22 @@ extension MainPresenter: MainPresenterHandler {
 
         let featurePrintStart = Date()
         let sourceImageFeaturePrint = featurePrintForImage(image: imageA.image)
-
         let modelImageFeaturePrint = featurePrintForImage(image: imageB.image)
-        let renderStart = Date()
+
+        let featurePrintEnd = Date()
         do{
-            var distance = Float(0)
-            if let sourceObservation = sourceImageFeaturePrint {
-                try modelImageFeaturePrint?.computeDistance(&distance, to: sourceObservation)
+            if let sourceObservation = sourceImageFeaturePrint, let modelObservation = modelImageFeaturePrint {
+
+                var distance = Float(0)
+                try modelObservation.computeDistance(&distance, to: sourceObservation)
                 let endDate = Date()
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
 
                     self.mainView?.updateResult(value: String(ceil(distance * 100) / 100.0))
 
-                    let featurePrintDuration = renderStart.timeIntervalSince(featurePrintStart) * 1000.0
-                    let distanceDuration = endDate.timeIntervalSince(renderStart) * 1_000_000.0
+                    let featurePrintDuration = featurePrintEnd.timeIntervalSince(featurePrintStart) * 1000.0
+                    let distanceDuration = endDate.timeIntervalSince(featurePrintEnd) * 1_000_000.0
                     let details = """
                     Feature print took: \(durationFormatter.string(from: featurePrintDuration as NSNumber)!) ms.
                     Distance computation took: \(durationFormatter.string(from: distanceDuration as NSNumber)!) µs.
